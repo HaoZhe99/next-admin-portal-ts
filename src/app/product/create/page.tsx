@@ -1,18 +1,65 @@
+"use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-
-import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import SelectGroupOne from "@/components/SelectGroup/SelectGroupOne";
-import Link from "next/link";
 import React from "react";
-
-export const metadata: Metadata = {
-  title: "Next.js Form Layout | TailAdmin - Next.js Dashboard Template",
-  description:
-    "This is Next.js Form Layout page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
-};
+import { useRouter } from "next/navigation";
 
 const CreateProduct = () => {
+  const router = useRouter();
+
+  const toBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
+
+  const onClickSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const name = formData.get("name") as string;
+    const price = formData.get("price") as string;
+    const status = formData.get("status") as string;
+    const image = formData.get("image") as any;
+
+    if (!name || !price || !status || !image) {
+      console.log(name, price, status, image);
+      alert("All fields are required.");
+      return;
+    }
+
+    try {
+      const base64Image = await toBase64(image);
+
+      const res = await fetch("/api/product", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, price, status, image: base64Image }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.message || "Something went wrong!");
+        console.error(error);
+        return;
+      }
+
+      const product = await res.json();
+      router.push("/product");
+      alert(`Product "${product.name}" created successfully!`);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Create Product" />
@@ -26,7 +73,7 @@ const CreateProduct = () => {
                 Product Form
               </h3>
             </div>
-            <form action="#">
+            <form action="#" onSubmit={onClickSubmit}>
               <div className="p-6.5">
                 <div className="mb-4.5">
                   <label className="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -47,7 +94,7 @@ const CreateProduct = () => {
                   <input
                     name="price"
                     type="number"
-                    placeholder="Enter your email address"
+                    placeholder="Enter your price"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
@@ -115,12 +162,16 @@ const CreateProduct = () => {
                     Image
                   </label>
                   <input
+                    name="image"
                     type="file"
                     className="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary"
                   />
                 </div>
 
-                <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                <button
+                  type="submit"
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                >
                   Submit
                 </button>
               </div>

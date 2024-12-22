@@ -1,12 +1,8 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import TableOne from "@/components/Tables/TableOne";
-import TableThree from "@/components/Tables/TableThree";
-import TableTwo from "@/components/Tables/TableTwo";
-
-import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Image from "next/image";
 import { Product } from "@/types/product";
+import Link from "next/link";
 
 const productData: Product[] = [
   {
@@ -43,17 +39,20 @@ const productData: Product[] = [
   },
 ];
 
-const TablesPage = () => {
+const ProductPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Tables" />
+      <Breadcrumb pageName="Product" />
 
       <div className="flex flex-col gap-10">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="px-4 py-6 md:px-6 xl:px-7.5">
-            <h4 className="text-xl font-semibold text-black dark:text-white">
-              Top Products
-            </h4>
+            <Link
+              href="/product/create"
+              className="inline-flex items-center justify-center rounded-md border border-black px-6 py-2 text-center font-medium text-black hover:bg-opacity-90"
+            >
+              Create
+            </Link>
           </div>
 
           <div className="grid grid-cols-6 border-t border-stroke px-4 py-4.5 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
@@ -120,4 +119,4 @@ const TablesPage = () => {
   );
 };
 
-export default TablesPage;
+export default ProductPage;
